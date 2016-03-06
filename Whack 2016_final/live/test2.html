@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<!-- TODO
+BUGS: 
+-skips first song?
+-sometimes 404 
+ADD: 
+-play pause fast forward
+-show only current song
+-->
+
+<html>
+  <head>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+    <script type="text/javascript" src="../common/get_key_with_callback.js"></script>
+    <script src="../common/spotify_en_tools.js"></script>
+    <link type="text/css" href="live_styles.css" rel="stylesheet" />
+    <link type="text/css" href="../common/styles.css" rel="stylesheet" />
+  </head>
+
+<body>
+    <div id='content'>
+
+    <br>
+    <div id='seed'>
+        <span class='box'> Seed song:
+            <input title="song" type="text"  size=34 id="song" 
+            onkeydown="if (event.keyCode == 13) addSeed()" name="song" value='spotify:track:3nCkURI30dSOA2ibF493nf'/>
+        </span>
+        <button value="go" id="go" name="go" onclick="addSeed()"> Go </button>
+    </div>
+
+    <div id="info"> </div>
+    <div id="all_results">
+        <div id='tracks'>
+            <!---<h2> The Playlist</h2>-->
+            <div id="results"> </div>
+        </div>
+    </div>
+    <div id='footer'> 
+  
+    </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+
+jQuery.ajaxSettings.traditional = true; 
+var host = 'http://developer.echonest.com/'
+var apiKey = 'L50XAMNSV0FMRBGAH';
+
+var embed = '<iframe src="https://embed.spotify.com/?uri=spotify:trackset:PREFEREDTITLE:TRACKS" style="width:640px; height:520px;" frameborder="0" allowtransparency="true"></iframe>';
+
+var songSeedList = ['spotify:track:1GC1MIaRMW3kfVK9VyD5Ii','spotify:track:5CMjjywI0eZMixPeqNd75R','spotify:track:0lbPLoj61m0e7jPMdGF5yK', 'spotify:track:5vL0KBvhuuFbF8PZTBnSN7', 'spotify:track:0YIFZapcCNaTZMttpOsa2q'];
+var testSongSeedList = [];
+
+function addSeed() {
+    testSongSeedList.push($("#song").val());
+    createSeedPlaylist(testSongSeedList, .4)
+    console.log(testSongSeedList.length)
+}
+
+function getSeeds() {
+    return testSongSeedList;
+}
+
+//create live playlist, song_id from user, focused = more clustered around seeds, variety 0-1, higher means more variety 
+function createSeedPlaylist(song_id, variety) { 
+    var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=' + apiKey + '&callback=?';
+
+    info("Creating radio based on initial song");
+    $.getJSON(url, 
+        { 
+            'track_id': song_id, 'format':'jsonp', 
+            'bucket': [ 'id:spotify', 
+            'tracks'], 'limit' : true,
+            'variety' : variety,
+            'results': 10, 'type':'song-radio', 
+        }, 
+            function(data) {
+                info("");
+                $("#results").empty();
+                if (! ('songs' in data.response)) {
+                    info("Can't find that artist");
+                } else {
+                    $("#all_results").show();
+                    var tracks = "";
+                    for (var i = 0; i < data.response.songs.length; i++) {
+                        var song = data.response.songs[i];
+                        var tid = song.tracks[0].foreign_id.replace('spotify:track:', '');
+                        tracks = tracks + tid + ',';
+                        console.log(tid);
+                    }
+                    var tembed = embed.replace('TRACKS', tracks);
+                    tembed = tembed.replace('PREFEREDTITLE', song_id + ' playlist');
+                    var li = $("<span>").html(tembed);
+                    $("#results").append(li);
+                    // var title = "Artist radio for " + song_id;
+                    // getSpotifyPlayer(data.response.songs, function(player) {
+                    // console.log('got the player');
+                    // $("#all_results").append(player);
+                }
+            }
+        );
+}
+
+// function newRadio() {
+//     var song_id = $("#song").val();
+//     createSeedPlaylist(song_id, .2);
+// }
+
+function info(txt) {
+    $("#info").text(txt);
+}
+</script>
+</html>

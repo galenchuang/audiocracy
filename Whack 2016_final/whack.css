@@ -1,0 +1,45 @@
+body {
+	background-color: black !important;
+}
+
+#headBlock img {
+	margin:auto;
+	max-width: 150px;
+}
+
+#headBlock {
+	background-color: #FFE6B2;
+	min-width: 100%;
+}
+
+#bodyBlock {
+	background-image: url('partying-people-full-hd-wallpaper.jpg');
+	background-size: cover;
+	min-height: 500px;
+}
+
+.jumbotron {
+	color: white !important;
+	text-shadow: black 0.1em 0.1em 0.5em;
+	background-color: rgba(0,0,0,0.5) !important;
+}
+
+h2, h3, label {
+	color: white !important;
+	text-shadow: black 0.1em 0.1em 0.2em;
+}
+
+#eventKey {
+	background-color: white;
+	border-color: gray;
+	border-radius: 1px;
+}
+
+a {
+	color: yellow;
+}
+
+.contactForm textarea
+.contactForm input {
+	color: black !important;
+}

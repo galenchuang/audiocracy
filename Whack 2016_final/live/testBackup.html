@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<!-- TODO
+BUGS: skips first song?
+
+
+-->
+
+<html>
+  <head>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+    <script type="text/javascript" src="../common/get_key_with_callback.js"></script>
+    <link type="text/css" href="live_styles.css" rel="stylesheet" />
+  </head>
+
+<body>
+    <div id='content'>
+
+    <br>
+    <div id='seed'>
+        <span class='box'> Seed song:
+            <input title="song" type="text"  size=34 id="song" 
+            onkeydown="if (event.keyCode == 13) newRadio()" name="song" value='spotify:track:3nCkURI30dSOA2ibF493nf'/>
+        </span>
+        <button value="go" id="go" name="go" onclick="newRadio()"> Go </button>
+    </div>
+
+    <div id="info"> </div>
+    <div id="all_results">
+        <div id='tracks'>
+            <!---<h2> The Playlist</h2>-->
+            <div id="results"> </div>
+        </div>
+    </div>
+    <div id='footer'> 
+  
+    </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+
+jQuery.ajaxSettings.traditional = true; 
+var host = 'http://developer.echonest.com/'
+var apiKey = 'L50XAMNSV0FMRBGAH';
+
+var embed = '<iframe src="https://embed.spotify.com/?uri=spotify:trackset:PREFEREDTITLE:TRACKS" style="width:640px; height:520px;" frameborder="0" allowtransparency="true"></iframe>';
+
+var songSeedList = ['1GC1MIaRMW3kfVK9VyD5Ii','5CMjjywI0eZMixPeqNd75R','0lbPLoj61m0e7jPMdGF5yK'];
+var initialSong = 'spotify:track:69kOkLUCkxIZYexIgSG8rq';
+//var initialSong = 'spotify:track:SOLKAMD140C25A1480';
+
+//create live playlist, song_id from user, focused = more clustered around seeds, variety 0-1, higher means more variety 
+function createRadio(song_id, wandering, variety) { 
+    //var url = "http://developer.echonest.com/api/v4/playlist/static?api_key=L50XAMNSV0FMRBGAH&song_id=SOHTZUF12A8C13582B&format=json&results=20&type=song-radio"
+    //var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=L50XAMNSV0FMRBGAH&song_id=1GC1MIaRMW3kfVK9VyD5Ii&format=jsonp&variety=0.2&results=5&type=song-radio'
+    var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=' + apiKey + '&callback=?';
+    //'&format=json&results=20&type=song-radio'
+    //var url = 'http://developer.echonest.com/api/v4/playlist/dynamic/create?api_key=' + apiKey + '&artist=weezer&type=artist-radio';
+    // var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=L50XAMNSV0FMRBGAH&track_id=spotify:track:1GC1MIaRMW3kfVK9VyD5Ii&format=json&results=5&type=song-radio';
+    //var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=L50XAMNSV0FMRBGAH&track_id=spotify:track:1GC1MIaRMW3kfVK9VyD5Ii&format=jsonp&bucket=id%3Aspotify&bucket=tracks&results=5&type=song-radio';
+    //with bucket: var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=L50XAMNSV0FMRBGAH&track_id=spotify:track:1GC1MIaRMW3kfVK9VyD5Ii&format=json&bucket=id%3Aspotify&bucket=tracksresults=5&type=song-radio';
+
+    info("Creating radio based on initial song");
+    $.getJSON(url, 
+        { 
+            // 'track_id': song_id, 
+            // 'format':'jsonp', 
+            // 'variety' : .5,
+            // 'results': 5, 
+            // 'type':'song-radio'
+
+            'track_id': song_id, 'format':'jsonp', 
+            'bucket': [ 'id:spotify', 
+            'tracks'], 'limit' : true,
+            'variety' : 1,
+            'results': 5, 'type':'song-radio', 
+        }, 
+            function(data) {
+                info("");
+                $("#results").empty();
+                if (! ('songs' in data.response)) {
+                    info("Can't find that artist");
+                } else {
+                    $("#all_results").show();
+                    var tracks = "";
+                    // for (var i = 0; i < data.response.songs.length; i++) {
+                    //     //console.log(data.response.songs[i]);
+                    //     var song = data.response.songs[i];
+                    //     //var tid = song.tracks[0].foreign_id.replace('spotify:track:', '');
+                    //     var songID = song.id;
+                    //     tracks = tracks + songID + ',';
+                    //     console.log(songID);
+                    // }
+                    // var tembed = embed.replace('TRACKS', tracks); //tracks = string of songIDs
+                    // tembed = tembed.replace('PREFEREDTITLE', song_id + ' playlist');
+                    // var li = $("<span>").html(tembed);
+                    // $("#results").append(li);
+                    for (var i = 0; i < data.response.songs.length; i++) {
+                        var song = data.response.songs[i];
+                        var tid = song.tracks[0].foreign_id.replace('spotify:track:', '');
+                        tracks = tracks + tid + ',';
+                        console.log(tid);
+                    }
+                    var tembed = embed.replace('TRACKS', tracks);
+                    tembed = tembed.replace('PREFEREDTITLE', song_id + ' playlist');
+                    var li = $("<span>").html(tembed);
+                    $("#results").append(li);
+                }
+            }
+        );
+}
+
+function newRadio() {
+    var song_id = $("#song").val();
+    createRadio(song_id, false, .2);
+}
+
+// function fetchArtistPlaylist(artist,  wandering, variety) {
+//     var url = host + 'api/v4/playlist/static?api_key=' + apiKey + '&callback=?';
+
+//     $("#all_results").hide();
+//     info("Creating the playlist ...");
+//     $.getJSON(url, { 'artist': artist, 'format':'jsonp', 
+//             'bucket': [ 'id:spotify', 'tracks'], 'limit' : true,
+//             'variety' : 1,
+//             'song_type': 'live',
+//             'results': 12, 'type':'artist-radio',  }, 
+//             function(data) {
+//                 info("");
+//                 $("#results").empty();
+//                 if (! ('songs' in data.response)) {
+//                     info("Can't find that artist");
+//                 } else {
+//                     $("#all_results").show();
+//                     var tracks = "";
+//                     for (var i = 0; i < data.response.songs.length; i++) {
+//                         var song = data.response.songs[i];
+//                         var tid = song.tracks[0].foreign_id.replace('spotify:track:', '');
+//                         tracks = tracks + tid + ',';
+//                     }
+//                     var tembed = embed.replace('TRACKS', tracks);
+//                     tembed = tembed.replace('PREFEREDTITLE', artist + ' playlist');
+//                     var li = $("<span>").html(tembed);
+//                     $("#results").append(li);
+//                 }
+//             });
+// }
+
+
+// function newArtist() {
+//     var artist = $("#artist").val();
+//     fetchArtistPlaylist(artist, false, .2);
+// }
+
+function info(txt) {
+    $("#info").text(txt);
+}
+
+// $(document).ready(function() {
+//     // fetchApiKey will fetch the Echo Nest demo key for demos
+//     // hosted on The Echo Nest, otherwise it fetch an empty key
+//     fetchApiKey( function(api_key, isLoggedIn) {
+//         if (!api_key) {
+//             api_key = 'MY_ECHO_NEST_API_KEY';
+//         }
+//         apiKey = api_key;
+//         $("#all_results").hide();
+//     });
+// });
+
+</script>
+</html>

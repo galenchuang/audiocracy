@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang ="en">
+
+<link rel="stylesheet" type="text/css" href="whack.css">
+
+<head>
+
+<title>Audiocracy</title>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<!-- <script src="echonest_tools.js"></script> -->
+
+
+<!-- Galen's scripts: -->
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+<script type="text/javascript" src="./common/get_key_with_callback.js"></script>
+<script src="./common/spotify_en_tools.js"></script>
+<!-- <link type="text/css" href="live/live_styles.css" rel="stylesheet" /> -->
+<link type="text/css" href="./common/styles.css" rel="stylesheet" />
+
+
+<style>
+#eventKey {
+	background-color: white;
+	border-color: gray;
+	border-radius: 1px;
+}
+
+/*h2, h3 {
+	text-shadow
+}*/
+</style>
+
+</head>
+<body>
+	<div id="homepage">
+		<div class="container" id="headBlock">
+			<div class="row">
+				<img src="logo3.png" class="img-responsive" />
+			</div>
+		</div>
+		<div id="bodyBlock">
+		<nav class="navbar navbar-inverse">
+			<div class="container" id="navBlock">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="index.html">Audiocracy</a>
+				</div>
+				<ul class="nav navbar-nav">
+					<li class="nav-item">
+						<a href="index.html">Home</a>
+					</li>
+					<li class="nav-item">
+						<a class="active" href="aboutAudiocracy.html">About</a>
+					</li>
+					<li clas="nav-item">
+						<a class="active" href="contactUs.html">Contact Us</a>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		<div class="container" id="mainBlock">
+			<div class="jumbotron">
+				<h2>Hey, {host}. Fire your DJ. We've got this.</h2>
+				<ol>
+					<li>First, pick out your favorite song. We'll use it generate your initial playlist. </li>
+					<li>Then generate your event key, and share it with your guests. </li>
+					<li>As they request music, the playlist will automatically update to suit the crowd.</li>
+				</ol>
+			</div>
+			<div class="row">
+				<div class="col-sm-4">
+					<h3>Step 1: Initialize your playlist</h3>
+					<form role="form">
+						<div class="form-group">
+							<label for="hostPick">
+								Choose a song (using the format Song, Artist): 
+							</label>
+							<input type="text" class="form-control" id="hostSubmit">
+						</div>
+							<button type="button" class="btn btn-warning btn-lg" id="hostSubmit" onclick="alert('Playlist Initialized!')"> Submit</button>
+					</form>
+				</div>
+				<div class="col-sm-4">
+					<h3>Step 2:  Generate your Event Key</h3>
+					<form role="form">
+						<div class="form-group">
+							<label for="keyGen">
+								Click to generate a key in the space below:
+							</label>
+							<button type="button" class="btn btn-warning btn-lg" id="keyGenerator">Generate Event Key</button>
+							<div id="eventKey">
+							</div>
+						</div>
+					</form>	
+				</div>
+				<div class="col-sm-4">
+					<h3>Step 3: Share your key!</h3>
+					<!-- Code from www.addtoany.com: AddToAny BEGIN -->
+					<div class="a2a_kit a2a_kit_size_32 a2a_default_style">
+					<a class="a2a_button_facebook" href="#"></a>
+					<a class="a2a_button_twitter" href="#"></a>
+					<a class="a2a_button_google_plus" href="#"></a>
+					</div>
+				</div>
+
+				<div id="all_results">
+        			<div id='tracks'>
+            		<!---<h2> The Playlist</h2>-->
+            			<div id="results"> </div>
+        			</div>
+    			</div>
+
+			</div>
+		</div>
+	</div>
+
+
+<script>
+document.getElementById('keyGenerator').onclick = function() {
+	var sampleKey = (Math.random()*1e32).toString(36)
+	document.getElementById('eventKey').innerHTML="<strong>Your random event key is: </strong>" + sampleKey;
+ }
+
+// var a2a_config = a2a_config || {};
+// a2a_config.linkname = "Request songs at Audiocracy!";
+// a2a_config.num_services = 4;
+// a2a_config.color_main = "333333";
+// a2a_config.color_border = "333333";
+// a2a_config.color_link_text = "333333";
+// a2a_config.color_link_text_hover = "333333";
+// a2a_config.color_bg = "f9e4a4";
+// a2a_config.color_arrow_hover = "fff";
+
+// </script>
+<!--
+<script type="text/javascript">
+
+
+jQuery.ajaxSettings.traditional = true; 
+var host = 'http://developer.echonest.com/'
+var apiKey = 'L50XAMNSV0FMRBGAH';
+
+var embed = '<iframe src="https://embed.spotify.com/?uri=spotify:trackset:PREFEREDTITLE:TRACKS" style="width:640px; height:520px;" frameborder="0" allowtransparency="true"></iframe>';
+
+// var songSeedList = ['spotify:track:1GC1MIaRMW3kfVK9VyD5Ii','spotify:track:5CMjjywI0eZMixPeqNd75R','spotify:track:0lbPLoj61m0e7jPMdGF5yK', 'spotify:track:5vL0KBvhuuFbF8PZTBnSN7', 'spotify:track:0YIFZapcCNaTZMttpOsa2q'];
+var songSeedList = [];
+var curSub = '';
+var curSubID = '';
+
+// function addSeedGuest() {
+// 	songSeedList.push($("#guestSubmit").val());
+// 	createSeedPlaylist(songSeedList, .4);
+//     console.log(songSeedList.length);
+// }
+
+function searchForSongHost() {
+	curSub = $("#hostSubmit").val();
+	artistFromInput = curSub.split(',')[1];
+	artistFromInput = artistFromInput.trim();
+	titleFromInput = curSub.split(',')[0];
+	titleFromInput = titleFromInput.trim();
+	var url = 'http://developer.echonest.com/api/v4/song/search?api_key=L50XAMNSV0FMRBGAH&callback=?';
+	// console.log(url);
+	$.getJSON(url, {
+		'format':'jsonp', 
+        'bucket': [ 'id:spotify', 
+        'tracks'], 
+        'results': 1, 
+        'artist': artistFromInput,
+        'title': titleFromInput,
+	}, 
+		function(data) {
+			var song = data.response.songs[0];
+            var curSubID = song.tracks[0].foreign_id;
+            songSeedList.push(curSubID);
+	}
+	);
+}
+
+function searchForSongGuest() {
+	curSub = $("#guestSubmit").val();
+	artistFromInput = curSub.split(',')[1];
+	artistFromInput = artistFromInput.trim();
+	titleFromInput = curSub.split(',')[0];
+	titleFromInput = titleFromInput.trim();
+	var url = 'http://developer.echonest.com/api/v4/song/search?api_key=L50XAMNSV0FMRBGAH&callback=?';
+	// console.log(url);
+	$.getJSON(url, {
+		'format':'jsonp', 
+        'bucket': ['id:spotify',
+        'tracks'],
+        'results': 1, 
+        'artist': artistFromInput,
+        'title': titleFromInput,
+	}, 
+		function(data) {
+			var song = data.response.songs[0];
+            var curSubID = song.tracks[0].foreign_id;
+            songSeedList.push(curSubID);
+	}
+	);
+}
+
+//create live playlist, song_id from user, focused = more clustered around seeds, variety 0-1, higher means more variety 
+function createSeedPlaylist(song_id, variety) { 
+    var url = 'http://developer.echonest.com/api/v4/playlist/static?api_key=' + apiKey + '&callback=?';
+    info("Creating radio based on initial song");
+    $.getJSON(url, 
+        { 
+            'track_id': song_id, 'format':'jsonp', 
+            'bucket': [ 'id:spotify', 
+            'tracks'], 'limit' : true,
+            'variety' : variety,
+            'results': 5, 'type':'song-radio', 
+        }, 
+            function(data) {
+                info("");
+                $("#results").empty();
+                if (! ('songs' in data.response)) {
+                    info("Can't find that artist");
+                } else {
+                    $("#all_results").show();
+                    var tracks = "";
+                    for (var i = 0; i < data.response.songs.length; i++) {
+                        var song = data.response.songs[i];
+                        var tid = song.tracks[0].foreign_id.replace('spotify:track:', '');
+                        tracks = tracks + tid + ',';
+                        //console.log(tid);
+                    }
+                    var tembed = embed.replace('TRACKS', tracks);
+                    tembed = tembed.replace('PREFEREDTITLE', song_id + ' playlist');
+                    var li = $("<span>").html(tembed);
+                    $("#results").append(li);
+                }
+            }
+        );
+}
+
+function info(txt) {
+    $("#info").text(txt);
+}
+
+</script>-->
+
+<script type="text/javascript" src="spotifyPlayer_tools.js"></script>
+<script async src="https://static.addtoany.com/menu/page.js"></script>
+</body>
+</html>
