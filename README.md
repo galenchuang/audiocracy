@@ -5,6 +5,6 @@ Future iterations of the project include separating the playlist from the guest 
 
 Current bugs: certain songs won't add to the playlist.
 
-Try it here: http://cs.wellesley.edu/~bmorris/Whack%202016/index.html
+Try it here: http://cs.wellesley.edu/~bmorris/Whack%202016/index.html (contact Galen for access)
 
 Audiocracy was created at WHACK 2016 at Wellesley College by Galen Chuang, Bianca Morris, and Julia Han. We used HTML, CSS, Javascript, and the Echo Nest API.
